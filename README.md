@@ -31,7 +31,7 @@ Update system packages and ensure virtualenv is installed:
     $ sudo apt-get update
     $ sudo apt-get -y install python-virtualenv
 
-Make sure the local GenixCore daemon running is at least version 12.1 (120100)
+Make sure the local GenixCore daemon running is at least version 0.2.1.0 (2010200)
 
     $ genix-cli getinfo | grep version
 
