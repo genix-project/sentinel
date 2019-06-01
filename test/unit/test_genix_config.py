@@ -59,26 +59,10 @@ def test_get_rpc_creds():
         assert key in creds
     assert creds.get('user') == 'genixrpc'
     assert creds.get('password') == 'EwJeV3fZTyTVozdECF627BkBMnNDwQaVLakG3A4wXYyk'
-    assert creds.get('port') == 32538
+    assert creds.get('port') == 143649
 
 
-def test_slurp_config_file():
-    import tempfile
-
-    genix_config = """# basic settings
-#testnet=1 # TESTNET
-server=1
-printtoconsole=1
-txindex=1 # enable transaction index
-"""
-
-    expected_stripped_config = """server=1
-printtoconsole=1
-txindex=1 # enable transaction index
-"""
-
-    with tempfile.NamedTemporaryFile(mode='w') as temp:
-        temp.write(genix_config)
-        temp.flush()
-        conf = GenixConfig.slurp_config_file(temp.name)
-        assert conf == expected_stripped_config
+# ensure genix network (mainnet, testnet) matches that specified in config
+# requires running genixd on whatever port specified...
+#
+# This is more of a genixd/jsonrpc test than a config test...

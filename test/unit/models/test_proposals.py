@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import pytest
 import sys
 import os
@@ -29,10 +28,10 @@ def go_list_proposals():
     items = [
         {u'AbsoluteYesCount': 1000,
          u'AbstainCount': 7,
-         u'CollateralHash': u'8a530f21f4ba8df826c9e82899a0d8f6c32edaefdfc7901f899a683e264e038e',
-         u'DataHex': u'5b5b2270726f706f73616c222c7b22656e645f65706f6368223a313535393131393631302c226e616d65223a2247656e69782d7465737431222c227061796d656e745f61646472657373223a22676d5554504e42664539346961345274703755697455554e79374259775365393975222c227061796d656e745f616d6f756e74223a313230302c2273746172745f65706f6368223a313535363335343831302c2274797065223a312c2275726c223a2268747470733a2f2f746573742e74657374227d5d5d',
-         u'DataString': u'[["proposal",{"end_epoch":1559119610,"name":"Genix-test1","payment_address":"gmUTPNBfE94ia4Rtp7UitUUNy7BYwSe99u","payment_amount":1200,"start_epoch":1556354810,"type":1,"url":"https://test.test"}]]',
-         u'Hash': u'8a530f21f4ba8df826c9e82899a0d8f6c32edaefdfc7901f899a683e264e038e',
+         u'CollateralHash': u'acb67ec3f3566c9b94a26b70b36c1f74a010a37c0950c22d683cc50da324fdca',
+         u'DataHex': u'5b5b2270726f706f73616c222c207b22656e645f65706f6368223a20323132323532303430302c20226e616d65223a202253757065722d70697a7a61222c20227061796d656e745f61646472657373223a2022716676745a6b38475966654d333767775a6948505a67564a476e77524573586b6f54222c20227061796d656e745f616d6f756e74223a2032353030302e37352c202273746172745f65706f6368223a20313437343236313038362c202274797065223a20312c202275726c223a2022687474703a2f2f706163636f696e2e696f2f70697a7a61227d5d5d',
+         u'DataString': u'[["proposal", {"end_epoch": 2122520400, "name": "Super-pizza", "payment_address": "qfvtZk8GYfeM37gwZiHPZgVJGnwREsXkoT", "payment_amount": 25000.75, "start_epoch": 1474261086, "type": 1, "url": "http://genix.io/pizza"}]]',
+         u'Hash': u'dfd7d63979c0b62456b63d5fc5306dbec451180adee85876cbf5b28c69d1a86c',
          u'IsValidReason': u'',
          u'NoCount': 25,
          u'YesCount': 1025,
@@ -44,8 +43,8 @@ def go_list_proposals():
         {u'AbsoluteYesCount': 1000,
          u'AbstainCount': 29,
          u'CollateralHash': u'3efd23283aa98c2c33f80e4d9ed6f277d195b72547b6491f43280380f6aac810',
-         u'DataHex': u'5b5b2270726f706f73616c222c207b22656e645f65706f6368223a20323132323532303430302c20226e616d65223a202247656e69782d6d61696e31222c20227061796d656e745f61646472657373223a2022474b3270584a73456e5a46664d365961424a753578424159544b5042324439767761222c20227061796d656e745f616d6f756e74223a2032352e37352c202273746172745f65706f6368223a20313437343236313038362c202274797065223a20312c202275726c223a2022687474703a2f2f67656e69632e63782f6d61696e74657374227d5d5d',
-         u'DataString': u'[["proposal", {"end_epoch": 2122520400, "name": "Genix-main1", "payment_address": "GK2pXJsEnZFfM6YaBJu5xBAYTKPB2D9vwa", "payment_amount": 25.75, "start_epoch": 1474261086, "type": 1, "url": "http://genic.cx/maintest"}]]',
+         u'DataHex': u'5b5b2270726f706f73616c222c207b22656e645f65706f6368223a20323132323532303430302c20226e616d65223a20225461636f732d636f6e2d6361726e65222c20227061796d656e745f61646472657373223a2022716676745a6b38475966654d333767775a6948505a67564a476e77524573586b6f54222c20227061796d656e745f616d6f756e74223a2032353030302e37352c202273746172745f65706f6368223a20313437343236313038362c202274797065223a20312c202275726c223a2022687474703a2f2f706163636f696e2e696f2f7461636f73227d5d5d',
+         u'DataString': u'[["proposal", {"end_epoch": 2122520400, "name": "Tacos-con-carne", "payment_address": "qfvtZk8GYfeM37gwZiHPZgVJGnwREsXkoT", "payment_amount": 25000.75, "start_epoch": 1474261086, "type": 1, "url": "http://genix.io/tacos"}]]',
          u'Hash': u'0523445762025b2e01a2cd34f1d10f4816cf26ee1796167e5b029901e5873630',
          u'IsValidReason': u'',
          u'NoCount': 56,
@@ -67,10 +66,10 @@ def proposal():
     pobj = Proposal(
         start_epoch=1483250400,  # 2017-01-01
         end_epoch=2122520400,
-        name="trees-and-leaves",
-        url="https://genix.cx/trees-and-leaves",
-        payment_address="GK2pXJsEnZFfM6YaBJu5xBAYTKPB2D9vwa",
-        payment_amount=13
+        name="wine-n-cheeze-party",
+        url="https://genix.io/wine-n-cheeze-party",
+        payment_address="qfvtZk8GYfeM37gwZiHPZgVJGnwREsXkoT",
+        payment_amount=13000
     )
 
     # NOTE: this object is (intentionally) not saved yet.
@@ -79,9 +78,9 @@ def proposal():
 
 
 def test_proposal_is_valid(proposal):
-    from genixd import genixDaemon
+    from genixd import GenixDaemon
     import genixlib
-    genixd = genixDaemon.from_genix_conf(config.genix_conf)
+    genixd = GenixDaemon.from_genix_conf(config.genix_conf)
 
     orig = Proposal(**proposal.get_dict())  # make a copy
 
@@ -128,27 +127,6 @@ def test_proposal_is_valid(proposal):
     proposal.name = 'R66-Y'
     assert proposal.is_valid() is True
 
-    proposal.name = 'valid-name'
-    assert proposal.is_valid() is True
-
-    proposal.name = '   mostly-valid-name'
-    assert proposal.is_valid() is False
-
-    proposal.name = 'also-mostly-valid-name   '
-    assert proposal.is_valid() is False
-
-    proposal.name = ' similarly-kinda-valid-name '
-    assert proposal.is_valid() is False
-
-    proposal.name = 'dean miller 5493'
-    assert proposal.is_valid() is False
-
-    proposal.name = 'dean-millerà-5493'
-    assert proposal.is_valid() is False
-
-    proposal.name = 'dean-миллер-5493'
-    assert proposal.is_valid() is False
-
     # binary gibberish
     proposal.name = genixlib.deserialise('22385c7530303933375c75303363375c75303232395c75303138635c75303064335c75303163345c75303264385c75303236615c75303134625c75303163335c75303063335c75303362385c75303266615c75303261355c75303266652f2b5c75303065395c75303164655c75303136655c75303338645c75303062385c75303138635c75303064625c75303064315c75303038325c75303133325c753032333222')
     assert proposal.is_valid() is False
@@ -162,30 +140,21 @@ def test_proposal_is_valid(proposal):
     proposal.payment_address = '7'
     assert proposal.is_valid() is False
 
-    proposal.payment_address = 'GYE8KWYAUU5YSWSYMB3Q3RYX8XTUU9Y7UI'
+    proposal.payment_address = 'QfvtZk8GYfeM37gwZiHPZgVJGnwREsXkoT'
     assert proposal.is_valid() is False
 
-    proposal.payment_address = 'gYe8KwyaUu5YswSYmB3q3ryx8XTUu9y7Uj'
+    proposal.payment_address = 'qfvtZk8GYfeM37gwZiHPZgVJGnwREsXkoU'
     assert proposal.is_valid() is False
 
     proposal.payment_address = '221 B Baker St., London, United Kingdom'
     assert proposal.is_valid() is False
 
-    # this is actually the genix foundation multisig address...
-    proposal.payment_address = '6XsKj5pgKV4am53FWEaHPVX82cCbvhX15c'
+    # this is actually the Genix foundation multisig address...
+    proposal.payment_address = '7gnwGHt17heGpG9Crfeh4KGpYNFugPhJdh'
     assert proposal.is_valid() is False
 
-    proposal.payment_address = 'gYe8KwyaUu5YswSYmB3q3ryx8XTUu9y7Ui'
+    proposal.payment_address = 'qfvtZk8GYfeM37gwZiHPZgVJGnwREsXkoT'
     assert proposal.is_valid() is True
-
-    proposal.payment_address = ' gYe8KwyaUu5YswSYmB3q3ryx8XTUu9y7Ui'
-    assert proposal.is_valid() is False
-
-    proposal.payment_address = 'gYe8KwyaUu5YswSYmB3q3ryx8XTUu9y7Ui '
-    assert proposal.is_valid() is False
-
-    proposal.payment_address = ' gYe8KwyaUu5YswSYmB3q3ryx8XTUu9y7Ui '
-    assert proposal.is_valid() is False
 
     # reset
     proposal = Proposal(**orig.get_dict())
@@ -198,30 +167,6 @@ def test_proposal_is_valid(proposal):
     assert proposal.is_valid() is False
 
     proposal.url = 'http://bit.ly/1e1EYJv'
-    assert proposal.is_valid() is True
-
-    proposal.url = ' http://bit.ly/1e1EYJv'
-    assert proposal.is_valid() is False
-
-    proposal.url = 'http://bit.ly/1e1EYJv '
-    assert proposal.is_valid() is False
-
-    proposal.url = ' http://bit.ly/1e1EYJv '
-    assert proposal.is_valid() is False
-
-    proposal.url = 'http://::12.34.56.78]/'
-    assert proposal.is_valid() is False
-
-    proposal.url = 'http://[::1/foo/bad]/bad'
-    assert proposal.is_valid() is False
-
-    proposal.url = 'http://genix.cx/trees-and-leaves'
-    assert proposal.is_valid() is False
-
-    proposal.url = 'http://genix.cx/trees-and-leaves'
-    assert proposal.is_valid() is True
-
-    proposal.url = 'http://genix.cx/trees-and-leaves'
     assert proposal.is_valid() is True
 
     proposal.url = 'https://example.com/resource.ext?param=1&other=2'
@@ -278,10 +223,22 @@ def test_proposal_is_expired(proposal):
     assert proposal.is_expired(superblockcycle=cycle) is True
 
 
+def test_proposal_is_deletable(proposal):
+    now = misc.now()
+    assert proposal.is_deletable() is False
+
+    proposal.end_epoch = now - (86400 * 29)
+    assert proposal.is_deletable() is False
+
+    # add a couple seconds for time variance
+    proposal.end_epoch = now - ((86400 * 30) + 2)
+    assert proposal.is_deletable() is True
+
+
 # deterministic ordering
 def test_approved_and_ranked(go_list_proposals):
-    from genixd import genixDaemon
-    genixd = genixDaemon.from_genix_conf(config.genix_conf)
+    from genixd import GenixDaemon
+    genixd = GenixDaemon.from_genix_conf(config.genix_conf)
 
     for item in go_list_proposals:
         (go, subobj) = GovernanceObject.import_gobject_from_genixd(genixd, item)
@@ -290,25 +247,3 @@ def test_approved_and_ranked(go_list_proposals):
 
     assert prop_list[0].object_hash == u'dfd7d63979c0b62456b63d5fc5306dbec451180adee85876cbf5b28c69d1a86c'
     assert prop_list[1].object_hash == u'0523445762025b2e01a2cd34f1d10f4816cf26ee1796167e5b029901e5873630'
-
-
-def test_proposal_size(proposal):
-    orig = Proposal(**proposal.get_dict())  # make a copy
-
-    proposal.url = 'https://testurl.com/'
-    proposal_length_bytes = len(proposal.serialise()) // 2
-
-    # how much space is available in the Proposal
-    extra_bytes = (Proposal.MAX_DATA_SIZE - proposal_length_bytes)
-
-    # fill URL field with max remaining space
-    proposal.url = proposal.url + ('x' * extra_bytes)
-
-    # ensure this is the max proposal size and is valid
-    assert (len(proposal.serialise()) // 2) == Proposal.MAX_DATA_SIZE
-    assert proposal.is_valid() is True
-
-    # add one more character to URL, Proposal should now be invalid
-    proposal.url = proposal.url + 'x'
-    assert (len(proposal.serialise()) // 2) == (Proposal.MAX_DATA_SIZE + 1)
-assert proposal.is_valid() is False

@@ -10,18 +10,16 @@ default_sentinel_config = os.path.normpath(
 )
 sentinel_config_file = os.environ.get('SENTINEL_CONFIG', default_sentinel_config)
 sentinel_cfg = GenixConfig.tokenize(sentinel_config_file)
-sentinel_version = "1.4.2"
+sentinel_version = "1.2.0"
+min_genixd_proto_version_with_sentinel_ping = 70208
 
 
 def get_genix_conf():
-    if sys.platform == 'win32':
-        genix_conf = os.path.join(os.getenv('APPDATA'), "GenixCore/genix.conf")
-    else:
-        home = os.environ.get('HOME')
+    home = os.environ.get('HOME')
 
-        genix_conf = os.path.join(home, ".genixcore/genix.conf")
-        if sys.platform == 'darwin':
-            genix_conf = os.path.join(home, "Library/Application Support/GenixCore/genix.conf")
+    genix_conf = os.path.join(home, ".genixcore/genix.conf")
+    if sys.platform == 'darwin':
+        genix_conf = os.path.join(home, "Library/Application Support/GenixCore/genix.conf")
 
     genix_conf = sentinel_cfg.get('genix_conf', genix_conf)
 
@@ -30,10 +28,6 @@ def get_genix_conf():
 
 def get_network():
     return sentinel_cfg.get('network', 'mainnet')
-
-
-def get_rpchost():
-    return sentinel_cfg.get('rpchost', '127.0.0.1')
 
 
 def sqlite_test_db_name(sqlite_file_path):
@@ -87,5 +81,4 @@ def get_db_conn():
 
 genix_conf = get_genix_conf()
 network = get_network()
-rpc_host = get_rpchost()
 db = get_db_conn()

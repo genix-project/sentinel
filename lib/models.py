@@ -4,6 +4,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'lib'))
 import init
 import time
+import binascii
 import datetime
 import re
 import simplejson
@@ -31,10 +32,7 @@ db.connect()
 GENIXD_GOVOBJ_TYPES = {
     'proposal': 1,
     'superblock': 2,
-}
-GOVOBJ_TYPE_STRINGS = {
-    1: 'proposal',
-    2: 'trigger',  # it should be trigger here, not superblock
+    'watchdog': 3,
 }
 
 # schema version follows format 'YYYYMMDD-NUM'.
@@ -84,14 +82,11 @@ class GovernanceObject(BaseModel):
             for purged in self.purged_network_objects(list(golist.keys())):
                 # SOMEDAY: possible archive step here
                 purged.delete_instance(recursive=True, delete_nullable=True)
-        except Exception as e:
-            printdbg("Got an error while purging: %s" % e)
 
-        for item in golist.values():
-            try:
+            for item in golist.values():
                 (go, subobj) = self.import_gobject_from_genixd(genixd, item)
-            except Exception as e:
-                printdbg("Got an error upon import: %s" % e)
+        except Exception as e:
+            printdbg("Got an error upon import: %s" % e)
 
     @classmethod
     def purged_network_objects(self, network_object_hashes):
@@ -104,9 +99,9 @@ class GovernanceObject(BaseModel):
     def import_gobject_from_genixd(self, genixd, rec):
         import decimal
         import genixlib
-        import binascii
-        import gobject_json
+        import inflection
 
+        object_hex = rec['DataHex']
         object_hash = rec['Hash']
 
         gobj_dict = {
@@ -118,17 +113,14 @@ class GovernanceObject(BaseModel):
             'no_count': rec['NoCount'],
         }
 
-        # deserialise and extract object
-        json_str = binascii.unhexlify(rec['DataHex']).decode('utf-8')
-        dikt = gobject_json.extract_object(json_str)
-
+        # shim/genixd conversion
+        object_hex = genixlib.SHIM_deserialise_from_genixd(object_hex)
+        objects = genixlib.deserialise(object_hex)
         subobj = None
 
-        type_class_map = {
-            1: Proposal,
-            2: Superblock,
-        }
-        subclass = type_class_map[dikt['type']]
+        obj_type, dikt = objects[0:2:1]
+        obj_type = inflection.pluralize(obj_type)
+        subclass = self._meta.reverse_rel[obj_type].model_class
 
         # set object_type in govobj table
         gobj_dict['object_type'] = subclass.govobj_type
@@ -225,7 +217,7 @@ class GovernanceObject(BaseModel):
             self.sync_network_vote(genixd, signal)
 
     def sync_network_vote(self, genixd, signal):
-        printdbg('\tSyncing network vote for object %s with signal %s' % (self.object_hash, signal.name))
+        printdbg('\tsyncing network vote for object %s with signal %s' % (self.object_hash, signal.name))
         vote_info = genixd.get_my_gobject_votes(self.object_hash)
         for vdikt in vote_info:
             if vdikt['signal'] != signal.name:
@@ -276,9 +268,6 @@ class Proposal(GovernanceClass, BaseModel):
     payment_amount = DecimalField(max_digits=16, decimal_places=8)
     object_hash = CharField(max_length=64)
 
-    # src/governance-validators.cpp
-    MAX_DATA_SIZE = 512
-
     govobj_type = GENIXD_GOVOBJ_TYPES['proposal']
 
     class Meta:
@@ -325,16 +314,6 @@ class Proposal(GovernanceClass, BaseModel):
                 printdbg("\tProposal URL [%s] too short, returning False" % self.url)
                 return False
 
-            # proposal URL has any whitespace
-            if (re.search(r'\s', self.url)):
-                printdbg("\tProposal URL [%s] has whitespace, returning False" % self.name)
-                return False
-
-            # Genix Core restricts proposals to 512 bytes max
-            if len(self.serialise()) > (self.MAX_DATA_SIZE * 2):
-                printdbg("\tProposal [%s] is too big, returning False" % self.name)
-                return False
-
             try:
                 parsed = urlparse.urlparse(self.url)
             except Exception as e:
@@ -379,6 +358,15 @@ class Proposal(GovernanceClass, BaseModel):
         printdbg("Leaving Proposal#is_expired, Expired = False")
         return False
 
+    def is_deletable(self):
+        # end_date < (current_date - 30 days)
+        thirty_days = (86400 * 30)
+        if (self.end_epoch < (misc.now() - thirty_days)):
+            return True
+
+        # TBD (item moved to external storage/GenixDrive, etc.)
+        return False
+
     @classmethod
     def approved_and_ranked(self, proposal_quorum, next_superblock_max_budget):
         # return all approved proposals, in order of descending vote count
@@ -419,6 +407,28 @@ class Proposal(GovernanceClass, BaseModel):
         if self.governance_object:
             rank = self.governance_object.absolute_yes_count
             return rank
+
+    def get_prepare_command(self):
+        import genixlib
+        obj_data = genixlib.SHIM_serialise_for_genixd(self.serialise())
+
+        # new superblocks won't have parent_hash, revision, etc...
+        cmd = ['gobject', 'prepare', '0', '1', str(int(time.time())), obj_data]
+
+        return cmd
+
+    def prepare(self, genixd):
+        try:
+            object_hash = genixd.rpc_command(*self.get_prepare_command())
+            printdbg("Submitted: [%s]" % object_hash)
+            self.go.object_fee_tx = object_hash
+            self.go.save()
+
+            manual_submit = ' '.join(self.get_submit_command())
+            print(manual_submit)
+
+        except JSONRPCException as e:
+            print("Unable to prepare: %s" % e.message)
 
 
 class Superblock(BaseModel, GovernanceClass):
@@ -476,6 +486,11 @@ class Superblock(BaseModel, GovernanceClass):
 
         printdbg("Leaving Superblock#is_valid, Valid = True")
         return True
+
+    def is_deletable(self):
+        # end_date < (current_date - 30 days)
+        # TBD (item moved to external storage/GenixDrive, etc.)
+        pass
 
     def hash(self):
         import genixlib
@@ -578,6 +593,50 @@ class Vote(BaseModel):
 
     class Meta:
         db_table = 'votes'
+
+
+class Watchdog(BaseModel, GovernanceClass):
+    governance_object = ForeignKeyField(GovernanceObject, related_name='watchdogs')
+    created_at = IntegerField()
+    object_hash = CharField(max_length=64)
+
+    govobj_type = GENIXD_GOVOBJ_TYPES['watchdog']
+    only_masternode_can_submit = True
+
+    @classmethod
+    def active(self, genixd):
+        now = int(time.time())
+        resultset = self.select().where(
+            self.created_at >= (now - genixd.SENTINEL_WATCHDOG_MAX_SECONDS)
+        )
+        return resultset
+
+    @classmethod
+    def expired(self, genixd):
+        now = int(time.time())
+        resultset = self.select().where(
+            self.created_at < (now - genixd.SENTINEL_WATCHDOG_MAX_SECONDS)
+        )
+        return resultset
+
+    def is_expired(self, genixd):
+        now = int(time.time())
+        return (self.created_at < (now - genixd.SENTINEL_WATCHDOG_MAX_SECONDS))
+
+    def is_valid(self, genixd):
+        if self.is_expired(genixd):
+            return False
+
+        return True
+
+    def is_deletable(self, genixd):
+        if self.is_expired(genixd):
+            return True
+
+        return False
+
+    class Meta:
+        db_table = 'watchdogs'
 
 
 class Transient(object):
@@ -687,7 +746,8 @@ def db_models():
         Superblock,
         Signal,
         Outcome,
-        Vote
+        Vote,
+        Watchdog
     ]
     return models
 
@@ -701,7 +761,7 @@ def check_db_sane():
     for model in db_models():
         if not getattr(model, 'table_exists')():
             missing_table_models.append(model)
-            printdbg("[warning]: Table for %s (%s) doesn't exist in DB." % (model, model._meta.db_table))
+            printdbg("[warning]: table for %s (%s) doesn't exist in DB." % (model, model._meta.db_table))
 
     if missing_table_models:
         printdbg("[warning]: Missing database tables. Auto-creating tables.")

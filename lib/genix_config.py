@@ -11,23 +11,23 @@ class GenixConfig():
 
     @classmethod
     def slurp_config_file(self, filename):
-        # read genixcore.conf config but skip commented lines
+        # read genix.conf config but skip commented lines
         f = io.open(filename)
         lines = []
         for line in f:
-            if re.match(r'^\s*#', line):
+            if re.match('^\s*#', line):
                 continue
             lines.append(line)
         f.close()
 
-        # data is genixcore.conf without commented lines
+        # data is genix.conf without commented lines
         data = ''.join(lines)
 
         return data
 
     @classmethod
     def get_rpc_creds(self, data, network='mainnet'):
-        # get rpc info from genixcore.conf
+        # get rpc info from genix.conf
         match = re.findall(r'rpc(user|password|port)=(.*?)$', data, re.MULTILINE)
 
         # python >= 2.7

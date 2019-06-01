@@ -6,7 +6,7 @@ import init
 import config
 import misc
 from genixd import GenixDaemon
-from models import Superblock, Proposal, GovernanceObject
+from models import Superblock, Proposal, GovernanceObject, Watchdog
 from models import VoteSignals, VoteOutcomes, Transient
 import socket
 from misc import printdbg
@@ -24,10 +24,55 @@ def perform_genixd_object_sync(genixd):
     GovernanceObject.sync(genixd)
 
 
+# delete old watchdog objects, create new when necessary
+def watchdog_check(genixd):
+    printdbg("in watchdog_check")
+
+    # delete expired watchdogs
+    for wd in Watchdog.expired(genixd):
+        printdbg("\tFound expired watchdog [%s], voting to delete" % wd.object_hash)
+        wd.vote(genixd, VoteSignals.delete, VoteOutcomes.yes)
+
+    # now, get all the active ones...
+    active_wd = Watchdog.active(genixd)
+    active_count = active_wd.count()
+
+    # none exist, submit a new one to the network
+    if 0 == active_count:
+        # create/submit one
+        printdbg("\tNo watchdogs exist... submitting new one.")
+        wd = Watchdog(created_at=int(time.time()))
+        wd.submit(genixd)
+
+    else:
+        wd_list = sorted(active_wd, key=lambda wd: wd.object_hash)
+
+        # highest hash wins
+        winner = wd_list.pop()
+        printdbg("\tFound winning watchdog [%s], voting VALID" % winner.object_hash)
+        winner.vote(genixd, VoteSignals.valid, VoteOutcomes.yes)
+
+        # if remaining Watchdogs exist in the list, vote delete
+        for wd in wd_list:
+            printdbg("\tFound losing watchdog [%s], voting DELETE" % wd.object_hash)
+            wd.vote(genixd, VoteSignals.delete, VoteOutcomes.yes)
+
+    printdbg("leaving watchdog_check")
+
+
 def prune_expired_proposals(genixd):
     # vote delete for old proposals
     for proposal in Proposal.expired(genixd.superblockcycle()):
         proposal.vote(genixd, VoteSignals.delete, VoteOutcomes.yes)
+
+
+# ping genixd
+def sentinel_ping(genixd):
+    printdbg("in sentinel_ping")
+
+    genixd.ping()
+
+    printdbg("leaving sentinel_ping")
 
 
 def attempt_superblock_creation(genixd):
@@ -115,11 +160,6 @@ def main():
     genixd = GenixDaemon.from_genix_conf(config.genix_conf)
     options = process_args()
 
-    # print version and return if "--version" is an argument
-    if options.version:
-        print("Genix Sentinel v%s" % config.sentinel_version)
-        return
-
     # check genixd connectivity
     if not is_genixd_port_open(genixd):
         print("Cannot connect to genixd. Please ensure genixd is running and the JSONRPC port is open to Sentinel.")
@@ -165,6 +205,12 @@ def main():
     # load "gobject list" rpc command data, sync objects into internal database
     perform_genixd_object_sync(genixd)
 
+    if genixd.has_sentinel_ping:
+        sentinel_ping(genixd)
+    else:
+        # delete old watchdog objects, create a new if necessary
+        watchdog_check(genixd)
+
     # auto vote network objects as valid/invalid
     # check_object_validity(genixd)
 
@@ -194,10 +240,6 @@ def process_args():
                         action='store_true',
                         help='Bypass scheduler and sync/vote immediately',
                         dest='bypass')
-    parser.add_argument('-v', '--version',
-                        action='store_true',
-                        help='Print the version (Genix Sentinel vX.X.X) and exit')
-
     args = parser.parse_args()
 
     return args

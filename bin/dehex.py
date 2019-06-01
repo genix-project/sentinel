@@ -7,4 +7,4 @@ if len(sys.argv) < 2:
     print(usage)
 else:
     json = binascii.unhexlify(sys.argv[1])
-print(json)
+    print(json)

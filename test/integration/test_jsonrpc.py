@@ -16,12 +16,12 @@ def test_genixd():
     config_text = GenixConfig.slurp_config_file(config.genix_conf)
     network = 'mainnet'
     is_testnet = False
-    genesis_hash = u'0000038977617c01646209e33e354174ef916df8284346b29aecfbc98fa43dd0'
+    genesis_hash = u'00000354655ff039a51273fe61d3b493bd2897fe6c16f732dbc4ae19f04b789e'
     for line in config_text.split("\n"):
         if line.startswith('testnet=1'):
             network = 'testnet'
             is_testnet = True
-            genesis_hash = u'000006874678aa53f78b7676ced0f443cd22ae8917199b5ec14d0b7b7df7b93d'
+            genesis_hash = u'00000da63bd9478b655ef6bf1bf76cd9af05202ab68643f9091e049b2b5280ed'
 
     creds = GenixConfig.get_rpc_creds(config_text, network)
     genixd = GenixDaemon(**creds)
@@ -29,7 +29,7 @@ def test_genixd():
 
     assert hasattr(genixd, 'rpc_connection')
 
-    # Genix testnet block 0 hash == 000006874678aa53f78b7676ced0f443cd22ae8917199b5ec14d0b7b7df7b93d
+    # Genix testnet block 0 hash == 00000da63bd9478b655ef6bf1bf76cd9af05202ab68643f9091e049b2b5280ed
     # test commands without arguments
     info = genixd.rpc_command('getinfo')
     info_keys = [
