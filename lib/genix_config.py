@@ -34,7 +34,7 @@ class GenixConfig():
         creds = {key: value for (key, value) in match}
 
         # standard Genix defaults...
-        default_port = 4001 if (network == 'mainnet') else 14001
+        default_port = 4001 if (network == 'mainnet') else 4001
 
         # use default port for network if not specified in genix.conf
         if not ('port' in creds):
